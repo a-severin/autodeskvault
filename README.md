@@ -1,2 +1,2 @@
 # autodeskvault
-Autodesk Vault web services Python wrapper 
+Autodesk Vault web-services Python wrapper 
