@@ -1,31 +1,48 @@
 from zeep import Client
-import types
+from typing import Dict
 from enum import Enum
 
 
+class VaultServices(Enum):
+    AuthService = 'AuthService'
+    CustomEntityService = 'CustomEntityService'
+    DocumentService = 'DocumentService'
+    PropertyService = 'PropertyService'
+
+
+def generate_service_urls(host: str, path: str, port: int, protocol: str, version: object):
+    services = {
+            VaultServices.AuthService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/Filestore/v{str(version)}/AuthService.svc?singleWsdl",
+            VaultServices.CustomEntityService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/CustomEntityService.svc?singleWsdl",
+            VaultServices.DocumentService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/DocumentService.svc?singleWsdl",
+            VaultServices.PropertyService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/PropertyService.svc?singleWsdl",
+        }
+    return services
+
+
+def connect(host: str, vault_name: str, user: str, password: str, port=None, additional_path=None, protocol='http', version='24'):
+    services = generate_service_urls(host, additional_path, port, protocol, version)
+    response = Client(services[VaultServices.AuthService.value]).service.SignIn(host, user, password, vault_name)
+    soap_header = response['header']
+    return Vault(services, soap_header)
+
+
 class Vault(object):
-    def __init__(self, host: str, vault_name: str, user: str, password: str):
-        response = Client(
-            'http://pointvault.pointcad.ru/AutodeskDM/Services/Filestore/v24/AuthService.svc?singleWsdl').service.SignIn(
-            host, user, password, vault_name)
-        header = response['header']
-        client = Client(
-            'http://pointvault.pointcad.ru/AutodeskDM/Services/Filestore/v24/AuthService.svc?singleWsdl')
-        client.set_default_soapheaders([header])
+    def __init__(self, services: Dict, soap_header):
+        client = Client(VaultServices.AuthService.value)
+        client.set_default_soapheaders([soap_header])
         self.auauth_service = client.service
 
-        client = Client(
-            'http://pointvault.pointcad.ru/AutodeskDM/Services/v24/CustomEntityService.svc?singleWsdl')
-        client.set_default_soapheaders([header])
+        client = Client(VaultServices.CustomEntityService.value)
+        client.set_default_soapheaders([soap_header])
         self.custom_entity_service = client.service
 
-        client = Client(
-            'http://pointvault.pointcad.ru/AutodeskDM/Services/v24/PropertyService.svc?singleWsdl')
-        client.set_default_soapheaders([header])
+        client = Client(VaultServices.PropertyService.value)
+        client.set_default_soapheaders([soap_header])
         self.property_service = client.service
 
-        client = Client('http://pointvault.pointcad.ru/AutodeskDM/Services/v24/DocumentService.svc?singleWsdl')
-        client.set_default_soapheaders([header])
+        client = Client(VaultServices.DocumentService.value)
+        client.set_default_soapheaders([soap_header])
         self.document_service = client.service
 
 
