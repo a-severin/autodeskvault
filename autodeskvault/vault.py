@@ -4,10 +4,29 @@ from enum import Enum
 
 
 class VaultServices(Enum):
+    AdminService = 'AdminService'
     AuthService = 'AuthService'
+    BehaviorService = 'BehaviorService'
+    CategoryService = 'CategoryService'
+    ChangeOrderService = 'ChangeOrderService'
     CustomEntityService = 'CustomEntityService'
     DocumentService = 'DocumentService'
+    DocumentServiceExtensions = 'DocumentServiceExtensions'
+    FilestoreService = 'FilestoreService'
+    FilestoreVaultService = 'FilestoreVaultService'
+    ForumService = 'ForumService'
+    KnowledgeVaultService = 'KnowledgeVaultService'
+    InformationService = 'InformationService'
+    IdentificationService = 'IdentificationService'
+    ItemService = 'ItemService'
+    JobService = 'JobService'
+    LifeCycleService = 'LifeCycleService'
+    PackageService = 'PackageService'
     PropertyService = 'PropertyService'
+    ReplicationService = 'ReplicationService'
+    RevisionService = 'RevisionService'
+    SecurityService = 'SecurityService'
+    WinAuthService = 'WinAuthService'
 
 
 def generate_service_urls(host: str, path: str, port: int, protocol: str, version: object):
@@ -20,7 +39,7 @@ def generate_service_urls(host: str, path: str, port: int, protocol: str, versio
     return services
 
 
-def connect(host: str, vault_name: str, user: str, password: str, port=None, additional_path=None, protocol='http', version='24'):
+def connect(host: str, vault_name: str, user: str, password: str, port=None, additional_path='', protocol='http', version='24'):
     services = generate_service_urls(host, additional_path, port, protocol, version)
     response = Client(services[VaultServices.AuthService.value]).service.SignIn(host, user, password, vault_name)
     soap_header = response['header']
@@ -29,19 +48,19 @@ def connect(host: str, vault_name: str, user: str, password: str, port=None, add
 
 class Vault(object):
     def __init__(self, services: Dict, soap_header):
-        client = Client(VaultServices.AuthService.value)
+        client = Client(services[VaultServices.AuthService.value])
         client.set_default_soapheaders([soap_header])
         self.auauth_service = client.service
 
-        client = Client(VaultServices.CustomEntityService.value)
+        client = Client(services[VaultServices.CustomEntityService.value])
         client.set_default_soapheaders([soap_header])
         self.custom_entity_service = client.service
 
-        client = Client(VaultServices.PropertyService.value)
+        client = Client(services[VaultServices.PropertyService.value])
         client.set_default_soapheaders([soap_header])
         self.property_service = client.service
 
-        client = Client(VaultServices.DocumentService.value)
+        client = Client(services[VaultServices.DocumentService.value])
         client.set_default_soapheaders([soap_header])
         self.document_service = client.service
 
