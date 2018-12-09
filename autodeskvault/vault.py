@@ -26,15 +26,31 @@ class VaultServices(Enum):
     ReplicationService = 'ReplicationService'
     RevisionService = 'RevisionService'
     SecurityService = 'SecurityService'
-    WinAuthService = 'WinAuthService'
 
 
 def generate_service_urls(host: str, path: str, port: int, protocol: str, version: object):
     services = {
+            VaultServices.AdminService.value: f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/AdminService.svc?singleWsdl",
             VaultServices.AuthService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/Filestore/v{str(version)}/AuthService.svc?singleWsdl",
+            VaultServices.BehaviorService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/BehaviorService.svc?singleWsdl",
+            VaultServices.CategoryService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/CategoryService.svc?singleWsdl",
+            VaultServices.ChangeOrderService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/ChangeOrderService.svc?singleWsdl",
             VaultServices.CustomEntityService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/CustomEntityService.svc?singleWsdl",
             VaultServices.DocumentService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/DocumentService.svc?singleWsdl",
+            VaultServices.DocumentServiceExtensions.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/DocumentServiceExtensions.svc?singleWsdl",
+            VaultServices.FilestoreService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/Filestore/v{str(version)}/FilestoreService.svc?singleWsdl",
+            VaultServices.FilestoreVaultService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/Filestore/v{str(version)}/FilestoreVaultService.svc?singleWsdl",
+            VaultServices.ForumService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/ForumService.svc?singleWsdl",
+            VaultServices.KnowledgeVaultService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/KnowledgeVaultService.svc?singleWsdl",
+            VaultServices.InformationService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/InformationService.svc?singleWsdl",
+            VaultServices.IdentificationService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/Filestore/v{str(version)}/IdentificationService.svc?singleWsdl",
+            VaultServices.ItemService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/ItemService.svc?singleWsdl",
+            VaultServices.JobService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/JobService.svc?singleWsdl",
+            VaultServices.LifeCycleService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/LifeCycleService.svc?singleWsdl",
+            VaultServices.PackageService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/PackageService.svc?singleWsdl",
             VaultServices.PropertyService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/PropertyService.svc?singleWsdl",
+            VaultServices.ReplicationService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/ReplicationService.svc?singleWsdl",
+            VaultServices.SecurityService.value:  f"{protocol}://{host}{'' if port is None else ':' + str(port)}/{path}/AutodeskDM/Services/v{str(version)}/SecurityService.svc?singleWsdl",
         }
     return services
 
@@ -63,6 +79,12 @@ class Vault(object):
         client = Client(services[VaultServices.DocumentService.value])
         client.set_default_soapheaders([soap_header])
         self.document_service = client.service
+
+        client = Client(services[VaultServices.SecurityService.value])
+        client.set_default_soapheaders([soap_header])
+        self.security_service = client.service
+
+        self.UserId = soap_header['SecurityHeader']['UserId']
 
 
 class EntityClassId(Enum):
@@ -223,3 +245,11 @@ class SearchRule(Enum):
     Must = "Must"
     May = "May"
     MustNot = "MustNot"
+
+class SysAclBeh(Enum):
+    '''
+    System ACL is Combined - effective security is the combination of the user ACL and the system (State) ACL</summary> 
+    System ACL is Override - effective security is the Override ACL
+    '''
+    Override = "Override"
+    Combined = "Combined"
